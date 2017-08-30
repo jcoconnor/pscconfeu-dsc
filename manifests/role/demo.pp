@@ -7,4 +7,6 @@ class role::demo {
   include ::profile::dsc::dscfirewall
   include ::profile::registry::regentries
   include ::profile::users::demousers
+  include ::profile::power::power
+  include ::profile::util::processexplorer
 }

@@ -1,4 +1,4 @@
-class win_essentials::power (
+class profile::power::power (
   $scheme = 'powersaver',
 ) {
   $guid = $scheme ? {
@@ -13,6 +13,7 @@ class win_essentials::power (
     command   => "PowerCfg -SetActive ${guid}",
     path      => 'C:\Windows\System32;C:\Windows\System32\WindowsPowerShell\v1.0',
     unless    => $check,
+    provider  => powershell,
     logoutput => true,
   }
 }
