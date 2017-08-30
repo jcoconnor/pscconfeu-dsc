@@ -1,4 +1,3 @@
 node win-agent1 {
-
-include users::users
+  include ::role::demo
 }
