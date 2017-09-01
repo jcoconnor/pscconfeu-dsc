@@ -30,3 +30,8 @@ node default {
   #   class { 'my_class': }
 }
 
+# Set defaults for all `exec` resources
+Exec {
+  path      => $::path,
+  logoutput => true,
+}
