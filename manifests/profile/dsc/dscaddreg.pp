@@ -21,7 +21,7 @@ class profile::dsc::dscaddreg {
     dsc_ensure    => 'Present',
     dsc_key       => 'HKEY_LOCAL_MACHINE\SOFTWARE\PuppetDSCDemo',
     dsc_valuename => 'Dsc_TestStringValue',
-    dsc_valuedata => 'Dogs',
+    dsc_valuedata => 'Dogs is barking',
     dsc_valuetype => 'String',
   }
 }
