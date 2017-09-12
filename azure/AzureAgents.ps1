@@ -9,14 +9,15 @@ $ResourceGroupName = "winopsrglondon"
 $VNetName = "vnet01"
 $LocationName = "UKSouth"
 $DomainNameSuffix = "uksouth.cloudapp.azure.com"
+$SecretName = "smoker"
+$VaultName = "WinOps2017Vault"
 
-
-#$cred = Get-Credential
 # Use Admin Plaintext password for this phase of configuration
 $secpasswd = ConvertTo-SecureString "11WinOpsLondon" -AsPlainText -Force
 $cred = New-Object System.Management.Automation.PSCredential ("puppet", $secpasswd)
-
-
+#$secretURL = (Get-AzureKeyVaultSecret -VaultName "$VaultName" -Name "$SecretName").Id
+#$sourceVaultId = (Get-AzureRmKeyVault -ResourceGroupName "$ResourceGroupName" -VaultName "$VaultName").ResourceId
+#$CertificateStore = "My"
 
 function New-WinOps2017VM {
 param (
@@ -65,22 +66,32 @@ param (
 					-VMName "$MachineName" `
 					-VMSize Standard_DS1_V2 | `
 				Set-AzureRmVMOperatingSystem `
-					-Windows -ComputerName myVM `
-					-Credential $cred | `
+					-Windows `
+					-ComputerName "$MachineName" `
+					-Credential $cred `
+					-WinRMHttp | `
 				Set-AzureRmVMSourceImage `
 					-PublisherName MicrosoftWindowsServer `
 					-Offer WindowsServer `
 					-Skus 2016-Datacenter `
 					-Version latest | `
 				Add-AzureRmVMNetworkInterface `
-					-Id $nic.Id
+					-Id $nic.Id 
 
 	Write-Host "Creating VM: $MachineName"
 	New-AzureRmVM -ResourceGroupName $ResourceGroupName `
 				-Location $LocationName `
 				-VM $vmConfig
+				
+	Write-Host "Enable remote host as trusted"
+	winrm set winrm/config/client "@{TrustedHosts='$MachineName'}"
+	
+#	mkdir c:\softwaredist
+#	netsh advfirewall firewall set rule group="network discovery" new enable=yes
+#	mkdir
+#	robocopy C:\SoftwareDist\ \\winopsdemo-20\c$\SoftwareDist *.* /s
+#	start-process -wait "msiexec" -ArgumentList "/i c:\SoftwareDist\puppet-agent-x64-latest.msi /qn /norestart PUPPET_AGENT_STARTUP_MODE=manual"
 }
-
 
 
 

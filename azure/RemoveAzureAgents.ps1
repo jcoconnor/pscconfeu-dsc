@@ -3,4 +3,4 @@
 
 . .\AzureAgents.ps1
 
-Remove-WinOps2017VM -MachineName WinopsDemo-12
+Remove-WinOps2017VM -MachineName WinopsDemo-18
