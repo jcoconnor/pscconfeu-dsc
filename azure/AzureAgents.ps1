@@ -95,7 +95,7 @@ param (
 				-ResourceGroupName "$ResourceGroupName" `
 				-Name "$MachineName"
 	$OSDisk = $mcname.StorageProfile.osdisk
-	$NIC = Get-AzureRmNetworkInterface | Where { $_.Id -eq $McObj.NetworkProfile.NetworkInterfaces[0].id }
+	$NIC = Get-AzureRmNetworkInterface | Where { $_.Id -eq $mcname.NetworkProfile.NetworkInterfaces[0].id }
 	$PublicIpAddress = Get-AzureRmPublicIpAddress | Where { $_.Id -eq $NIC.IPConfigurations.PublicIpAddress.id }
 
 	# Delete Machine
