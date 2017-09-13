@@ -23,4 +23,5 @@ class profile::util::processexplorer {
 		require => Archive['C:/temp/processexplorer.zip'],
 	}
 	# Comment to force push
+	# Another comment
 }
