@@ -15,9 +15,6 @@ $VaultName = "WinOps2017Vault"
 # Use Admin Plaintext password for this phase of configuration
 $secpasswd = ConvertTo-SecureString "11WinOpsLondon" -AsPlainText -Force
 $cred = New-Object System.Management.Automation.PSCredential ("puppet", $secpasswd)
-#$secretURL = (Get-AzureKeyVaultSecret -VaultName "$VaultName" -Name "$SecretName").Id
-#$sourceVaultId = (Get-AzureRmKeyVault -ResourceGroupName "$ResourceGroupName" -VaultName "$VaultName").ResourceId
-#$CertificateStore = "My"
 
 function New-WinOps2017VM {
 param (
@@ -83,14 +80,33 @@ param (
 				-Location $LocationName `
 				-VM $vmConfig
 				
-	Write-Host "Enable remote host as trusted"
-	winrm set winrm/config/client "@{TrustedHosts='$MachineName'}"
+	Write-Host "Enable remote host as trusted and enabling Filesharing"
+	winrm set winrm/config/client "@{TrustedHosts=""$MachineName""}"	
+	Invoke-Command `
+		-ComputerName "$MachineName" `
+		-ScriptBlock { netsh advfirewall firewall set rule group="network discovery" new enable=yes }
+	Invoke-Command `
+		-ComputerName "$MachineName" `
+		-ScriptBlock { mkdir c:\SoftwareDist }
+	Invoke-Command `
+		-ComputerName "$MachineName" `
+		-ScriptBlock { New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -Value "0x1" -Force }
 	
-#	mkdir c:\softwaredist
-#	netsh advfirewall firewall set rule group="network discovery" new enable=yes
-#	mkdir
-#	robocopy C:\SoftwareDist\ \\winopsdemo-20\c$\SoftwareDist *.* /s
-#	start-process -wait "msiexec" -ArgumentList "/i c:\SoftwareDist\puppet-agent-x64-latest.msi /qn /norestart PUPPET_AGENT_STARTUP_MODE=manual"
+	Write-Host "Copy Software Over"
+	$DestSwDir = "\\" + $MachineName + "\c`$\SoftwareDist"
+	Robocopy /s C:\SoftwareDist "$DestSwDir" *.*
+	
+	Write-Host "Install Puppet"
+	$PuppetCertName = "$MachineName`.$DomainNameSuffix"
+	Invoke-Command `
+		-ComputerName "$MachineName" `
+		-ScriptBlock { start-process `
+							-wait "msiexec" `
+							-ArgumentList "/i c:\SoftwareDist\puppet-agent-x64-latest.msi /qn /norestart `
+											PUPPET_AGENT_STARTUP_MODE=disabled `
+											PUPPET_MASTER_SERVER=winopsmasterlondon `
+											PUPPET_AGENT_CERTNAME=$PuppetCertName `
+											" } 
 }
 
 

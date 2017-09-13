@@ -3,4 +3,4 @@
 
 . .\AzureAgents.ps1
 
-New-WinOps2017VM -MachineName WinopsDemo-20
+New-WinOps2017VM -MachineName WinopsDemo-22
