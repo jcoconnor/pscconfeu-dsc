@@ -87,6 +87,9 @@ param (
 		-ScriptBlock { netsh advfirewall firewall set rule group="network discovery" new enable=yes }
 	Invoke-Command `
 		-ComputerName "$MachineName" `
+		-ScriptBlock { netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=yes }
+	Invoke-Command `
+		-ComputerName "$MachineName" `
 		-ScriptBlock { mkdir c:\SoftwareDist }
 	Invoke-Command `
 		-ComputerName "$MachineName" `
@@ -100,13 +103,36 @@ param (
 	$PuppetCertName = "$MachineName`.$DomainNameSuffix"
 	Invoke-Command `
 		-ComputerName "$MachineName" `
-		-ScriptBlock { start-process `
+		-ArgumentList "$PuppetCertName" `
+		-ScriptBlock { param([string]$PuppetCertName) start-process `
+							-Passthru `
+							-NoNewWindow `
 							-wait "msiexec" `
 							-ArgumentList "/i c:\SoftwareDist\puppet-agent-x64-latest.msi /qn /norestart `
 											PUPPET_AGENT_STARTUP_MODE=disabled `
 											PUPPET_MASTER_SERVER=winopsmasterlondon `
-											PUPPET_AGENT_CERTNAME=$PuppetCertName `
-											" } 
+											PUPPET_AGENT_CERTNAME=$PuppetCertName " }
+
+	Write-Host "Installing Notepad++"
+	Invoke-Command `
+		-ComputerName "$MachineName" `
+		-ScriptBlock { start-process `
+							-Passthru `
+							-NoNewWindow `
+							-wait "C:\SoftwareDist\npp.7.5.1.Installer.x64.exe"  `
+							-ArgumentList "/S" }
+	Write-Host "Notepad++ Installed"
+
+	Write-Host "Installing Git For Windows"
+	Invoke-Command `
+		-ComputerName "$MachineName" `
+		-ScriptBlock { start-process `
+							-Passthru `
+							-NoNewWindow `
+							-wait "C:\SoftwareDist\Git-2.14.1-64-bit.exe" `
+							-ArgumentList "/VERYSILENT /LOADINF=A:\gitforwin.inf" }
+	Write-Host "Git For Windows Installed"											
+											
 }
 
 
