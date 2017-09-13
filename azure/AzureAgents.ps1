@@ -64,7 +64,7 @@ param (
 					-VMSize Standard_DS1_V2 | `
 				Set-AzureRmVMOperatingSystem `
 					-Windows `
-					-ComputerName "$MachineName" `
+					-ComputerName "$DomainNameLabel" `
 					-Credential $cred `
 					-WinRMHttp | `
 				Set-AzureRmVMSourceImage `
@@ -81,18 +81,18 @@ param (
 				-VM $vmConfig
 				
 	Write-Host "Enable remote host as trusted and enabling Filesharing"
-	winrm set winrm/config/client "@{TrustedHosts=""$MachineName""}"	
+	winrm set winrm/config/client "@{TrustedHosts=""$DomainNameLabel""}"	
 	Invoke-Command `
-		-ComputerName "$MachineName" `
+		-ComputerName "$DomainNameLabel" `
 		-ScriptBlock { netsh advfirewall firewall set rule group="network discovery" new enable=yes }
 	Invoke-Command `
-		-ComputerName "$MachineName" `
+		-ComputerName "$DomainNameLabel" `
 		-ScriptBlock { netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=yes }
 	Invoke-Command `
-		-ComputerName "$MachineName" `
+		-ComputerName "$DomainNameLabel" `
 		-ScriptBlock { mkdir c:\SoftwareDist }
 	Invoke-Command `
-		-ComputerName "$MachineName" `
+		-ComputerName "$DomainNameLabel" `
 		-ScriptBlock { New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -Value "0x1" -Force }
 	
 	Write-Host "Copy Software Over"
@@ -100,18 +100,15 @@ param (
 	Robocopy /s C:\SoftwareDist "$DestSwDir" *.*
 	
 	Write-Host "Install Puppet"
-	$PuppetCertName = "$MachineName`.$DomainNameSuffix"
+	$PuppetCertName = "$DomainNameLabel`.$DomainNameSuffix"
 	Invoke-Command `
-		-ComputerName "$MachineName" `
+		-ComputerName "$DomainNameLabel" `
 		-ArgumentList "$PuppetCertName" `
 		-ScriptBlock { param([string]$PuppetCertName) start-process `
 							-Passthru `
 							-NoNewWindow `
 							-wait "msiexec" `
-							-ArgumentList "/i c:\SoftwareDist\puppet-agent-x64-latest.msi /qn /norestart `
-											PUPPET_AGENT_STARTUP_MODE=disabled `
-											PUPPET_MASTER_SERVER=winopsmasterlondon `
-											PUPPET_AGENT_CERTNAME=$PuppetCertName " }
+							-ArgumentList "/i c:\SoftwareDist\puppet-agent-x64-latest.msi /qn /norestart PUPPET_AGENT_STARTUP_MODE=disabled PUPPET_MASTER_SERVER=winopsmasterlondon PUPPET_AGENT_CERTNAME=$PuppetCertName" }
 
 	Write-Host "Installing Notepad++"
 	Invoke-Command `
@@ -130,8 +127,26 @@ param (
 							-Passthru `
 							-NoNewWindow `
 							-wait "C:\SoftwareDist\Git-2.14.1-64-bit.exe" `
-							-ArgumentList "/VERYSILENT /LOADINF=A:\gitforwin.inf" }
-	Write-Host "Git For Windows Installed"											
+							-ArgumentList "/VERYSILENT /LOADINF=C:\SoftwareDist\gitforwin.inf" }
+	Write-Host "Git For Windows Installed"
+	
+	Write-Host "Installing Chocolatey"
+	Invoke-Command `
+		-ComputerName "$DomainNameLabel" `
+		-ScriptBlock { cd C:\SoftwareDist\chocolatey.0.10.8\tools; & .\chocolateyInstall.ps1; choco upgrade chocolatey -y }
+	Write-Host "Chocolatey Installed"
+	
+	Write-Host "Installing 7zip"
+	Invoke-Command `
+		-ComputerName "$MachineName" `
+		-ScriptBlock { start-process `
+							-Passthru `
+							-NoNewWindow `
+							-wait "C:\SoftwareDist\7z1604-x64.exe" `
+							-ArgumentList "/S" }
+	Write-Host "7zip installed"
+
+	Write-Host "Configuration of $MachineName Completed"
 											
 }
 
