@@ -4,8 +4,8 @@
 . .\AzureAgents.ps1
 
 $MachineList = @(
-'WinopsDemo-45',
-  'WinopsDemo-46'
+  'WinopsDemo-49',
+  'WinopsDemo-50'
   )
 
 $MachineList | % {

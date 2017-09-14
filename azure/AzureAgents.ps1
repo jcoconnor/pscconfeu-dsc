@@ -71,7 +71,8 @@ param (
 					-Skus 2016-Datacenter `
 					-Version latest | `
 				Add-AzureRmVMNetworkInterface `
-					-Id $nic.Id 
+					-Id $nic.Id `
+					-Primary
 
 	Write-Host "Creating VM: $MachineName"
 	New-AzureRmVM -ResourceGroupName $ResourceGroupName `
@@ -97,7 +98,7 @@ param (
 						mkdir c:\SoftwareDist
 						New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -Value "0x1" -Force
 					}
-
+					
 	Write-Host "Copy Software Over"
 	$DestSwDir = "\\" + $MachineName + "\c`$\SoftwareDist"
 	Robocopy /s C:\SoftwareDist "$DestSwDir" *.*
@@ -154,7 +155,16 @@ param (
 	Write-Host "7zip installed"
 
 	Write-Host "Configuration of $MachineName Completed"
-											
+
+#	Invoke-Command `
+#		-ComputerName "$MachineName" `
+#		-ScriptBlock { 
+#						$networkConfig = Get-WmiObject Win32_NetworkAdapterConfiguration -filter "ipenabled = 'true'"
+#						$networkConfig.SetDnsDomain("uksouth.cloudapp.azure.com")
+#						$networkConfig.SetDynamicDNSRegistration($true,$true)
+#						ipconfig /registerdns
+#					}
+	
 }
 
 

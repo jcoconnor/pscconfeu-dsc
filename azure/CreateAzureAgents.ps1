@@ -5,7 +5,8 @@
 
 
 $MachineList = @(
-  'WinopsDemo-47'
+  'WinopsDemo-51',
+  'WinopsDemo-52'
 )
 $MachineList | % {
 
