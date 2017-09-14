@@ -1,20 +1,20 @@
 class profile::users::demousers {
 
- user { 'jim':
+ user { 'winopsdemo_1':
   # on Windows can use username, domain\user and SID
-  name                 => 'jimijohn',
+  name                 => 'WinOps DemoUser 1',
   ensure               => present,
   managehome           => true,
-  password             => 'bob1A!fsafsfaswef',
+  password             => 'GarbledPasswd!',
   groups               => ['Administrators', 'Users']
  }
 
- user { 'joe':
+ user { 'winopsdemo_2':
   # on Windows can use username, domain\user and SID
-  name                 => 'joesoap',
+  name                 => 'WinOps DemoUser 2',
   ensure               => present,
   managehome           => true,
-  password             => 'bob1A!fsafsfaswef',
+  password             => 'GarbledPasswd!',
   groups               => ['Administrators', 'Users']
  }
 

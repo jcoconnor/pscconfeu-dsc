@@ -22,7 +22,4 @@ class profile::util::processexplorer {
 		source  => 'C:/temp/processexplorer/procexp.exe',
 		require => Archive['C:/temp/processexplorer.zip'],
 	}
-	# Comment to force push
-	# Another comment
-	# Another push
 }
