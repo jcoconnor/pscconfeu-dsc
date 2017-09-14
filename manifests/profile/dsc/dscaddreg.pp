@@ -13,7 +13,7 @@ class profile::dsc::dscaddreg {
     dsc_ensure    => 'Present',
     dsc_key       => 'HKEY_LOCAL_MACHINE\SOFTWARE\PuppetDSCDemo',
     dsc_valuename => 'Dsc_TestDwordValue',
-    dsc_valuedata => '1',
+    dsc_valuedata => '42',
     dsc_valuetype => 'Dword',
   }
 
@@ -21,7 +21,7 @@ class profile::dsc::dscaddreg {
     dsc_ensure    => 'Present',
     dsc_key       => 'HKEY_LOCAL_MACHINE\SOFTWARE\PuppetDSCDemo',
     dsc_valuename => 'Dsc_TestStringValue',
-    dsc_valuedata => 'Dogs is barking',
+    dsc_valuedata => 'WinOps 2017 Demonstration (DSC)',
     dsc_valuetype => 'String',
   }
 }
