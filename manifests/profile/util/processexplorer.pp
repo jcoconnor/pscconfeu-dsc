@@ -10,7 +10,7 @@ class profile::util::processexplorer {
 	}
 
 	archive { 'C:/temp/processexplorer.zip':
-	  source       => 'http://download.sysinternals.com/files/ProcessExplorer.zip',
+	  source       => 'C:/SoftwareDist/ProcessExplorer.zip',
 	  extract      => true,
 	  extract_path => 'C:/temp/processexplorer',
 	  creates      => 'C:/temp/processexplorer/procexp.exe',
