@@ -3,4 +3,14 @@
 
 . .\AzureAgents.ps1
 
-Remove-WinOps2017VM -MachineName WinopsDemo-20
+$MachineList = @(
+'WinopsDemo-45',
+  'WinopsDemo-46'
+  )
+
+$MachineList | % {
+
+  $MachineName = $_.toLower()
+  Remove-WinOps2017VM -MachineName $MachineName
+
+}

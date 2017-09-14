@@ -20,7 +20,6 @@ function New-WinOps2017VM {
 param (
   [string]$MachineName
  )
-
 	# Create:
 	# 1. IP Address
 	# 2. Network Interface
@@ -28,12 +27,11 @@ param (
 	# nsg and vnet are used from existing resources.
 
 	$IPName = $MachineName + "-IP"
-	$DomainNameLabel = $MachineName.toLower()
 	Write-Host "Creating Public IP $IPName"
 	# Create a public IP address and specify a DNS name
 	$publicIP = New-AzureRmPublicIpAddress `
 				-ResourceGroupName $ResourceGroupName `
-				-DomainNameLabel "$DomainNameLabel" `
+				-DomainNameLabel "$MachineName" `
 				-Location $LocationName `
 				-AllocationMethod Static `
 				-IdleTimeoutInMinutes 4 `
@@ -64,7 +62,7 @@ param (
 					-VMSize Standard_DS1_V2 | `
 				Set-AzureRmVMOperatingSystem `
 					-Windows `
-					-ComputerName "$DomainNameLabel" `
+					-ComputerName "$MachineName" `
 					-Credential $cred `
 					-WinRMHttp | `
 				Set-AzureRmVMSourceImage `
@@ -79,36 +77,42 @@ param (
 	New-AzureRmVM -ResourceGroupName $ResourceGroupName `
 				-Location $LocationName `
 				-VM $vmConfig
-				
+
+}
+
+
+function Configure-WinOps2017VM {
+param (
+  [string]$MachineName
+ )
+	Write-Host "Configuring $MachineName"
+ 
 	Write-Host "Enable remote host as trusted and enabling Filesharing"
-	winrm set winrm/config/client "@{TrustedHosts=""$DomainNameLabel""}"	
+	winrm set winrm/config/client "@{TrustedHosts=""$MachineName""}"	
 	Invoke-Command `
-		-ComputerName "$DomainNameLabel" `
-		-ScriptBlock { netsh advfirewall firewall set rule group="network discovery" new enable=yes }
-	Invoke-Command `
-		-ComputerName "$DomainNameLabel" `
-		-ScriptBlock { netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=yes }
-	Invoke-Command `
-		-ComputerName "$DomainNameLabel" `
-		-ScriptBlock { mkdir c:\SoftwareDist }
-	Invoke-Command `
-		-ComputerName "$DomainNameLabel" `
-		-ScriptBlock { New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -Value "0x1" -Force }
-	
+		-ComputerName "$MachineName" `
+		-ScriptBlock { 
+						netsh advfirewall firewall set rule group="network discovery" new enable=yes 
+						netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=yes
+						mkdir c:\SoftwareDist
+						New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -Value "0x1" -Force
+					}
+
 	Write-Host "Copy Software Over"
 	$DestSwDir = "\\" + $MachineName + "\c`$\SoftwareDist"
 	Robocopy /s C:\SoftwareDist "$DestSwDir" *.*
 	
 	Write-Host "Install Puppet"
-	$PuppetCertName = "$DomainNameLabel`.$DomainNameSuffix"
+	$PuppetCertName = "$MachineName`.$DomainNameSuffix"
 	Invoke-Command `
-		-ComputerName "$DomainNameLabel" `
+		-ComputerName "$MachineName" `
 		-ArgumentList "$PuppetCertName" `
 		-ScriptBlock { param([string]$PuppetCertName) start-process `
 							-Passthru `
 							-NoNewWindow `
 							-wait "msiexec" `
 							-ArgumentList "/i c:\SoftwareDist\puppet-agent-x64-latest.msi /qn /norestart PUPPET_AGENT_STARTUP_MODE=disabled PUPPET_MASTER_SERVER=winopsmasterlondon PUPPET_AGENT_CERTNAME=$PuppetCertName" }
+	Write-Host "Puppet Installed"
 
 	Write-Host "Installing Notepad++"
 	Invoke-Command `
@@ -132,8 +136,11 @@ param (
 	
 	Write-Host "Installing Chocolatey"
 	Invoke-Command `
-		-ComputerName "$DomainNameLabel" `
-		-ScriptBlock { cd C:\SoftwareDist\chocolatey.0.10.8\tools; & .\chocolateyInstall.ps1; choco upgrade chocolatey -y }
+		-ComputerName "$MachineName" `
+		-ScriptBlock { 
+						cd C:\SoftwareDist\chocolatey.0.10.8\tools
+						& .\chocolateyInstall.ps1
+					}
 	Write-Host "Chocolatey Installed"
 	
 	Write-Host "Installing 7zip"
