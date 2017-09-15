@@ -1,4 +1,4 @@
-class ::profile::iis::iisservice {
+class profile::iis::iisservice {
   windowsfeature { 'Web-Webserver':
     ensure             => present,
     installsubfeatures => true,
