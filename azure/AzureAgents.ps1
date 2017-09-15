@@ -13,7 +13,7 @@ $SecretName = "smoker"
 $VaultName = "WinOps2017Vault"
 
 # Use Admin Plaintext password for this phase of configuration
-$secpasswd = ConvertTo-SecureString "11WinOpsLondon" -AsPlainText -Force
+$secpasswd = ConvertTo-SecureString "WinOps2017" -AsPlainText -Force
 $cred = New-Object System.Management.Automation.PSCredential ("puppet", $secpasswd)
 
 function New-WinOps2017VM {
@@ -92,6 +92,7 @@ param (
 	winrm set winrm/config/client "@{TrustedHosts=""$MachineName""}"	
 	Invoke-Command `
 		-ComputerName "$MachineName" `
+		-Credential $cred `
 		-ScriptBlock { 
 						netsh advfirewall firewall set rule group="network discovery" new enable=yes 
 						netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=yes
@@ -101,12 +102,14 @@ param (
 					
 	Write-Host "Copy Software Over"
 	$DestSwDir = "\\" + $MachineName + "\c`$\SoftwareDist"
+	NET USE \\$MachineName\IPC$ /u:$MachineName\puppet WinOps2017 
 	Robocopy /s C:\SoftwareDist "$DestSwDir" *.*
 	
 	Write-Host "Install Puppet"
 	$PuppetCertName = "$MachineName`.$DomainNameSuffix"
 	Invoke-Command `
 		-ComputerName "$MachineName" `
+		-Credential $cred `
 		-ArgumentList "$PuppetCertName" `
 		-ScriptBlock { param([string]$PuppetCertName) start-process `
 							-Passthru `
@@ -118,6 +121,7 @@ param (
 	Write-Host "Installing Notepad++"
 	Invoke-Command `
 		-ComputerName "$MachineName" `
+		-Credential $cred `
 		-ScriptBlock { start-process `
 							-Passthru `
 							-NoNewWindow `
@@ -128,6 +132,7 @@ param (
 	Write-Host "Installing Git For Windows"
 	Invoke-Command `
 		-ComputerName "$MachineName" `
+		-Credential $cred `
 		-ScriptBlock { start-process `
 							-Passthru `
 							-NoNewWindow `
@@ -138,6 +143,7 @@ param (
 	Write-Host "Installing Chocolatey"
 	Invoke-Command `
 		-ComputerName "$MachineName" `
+		-Credential $cred `
 		-ScriptBlock { 
 						cd C:\SoftwareDist\chocolatey.0.10.8\tools
 						& .\chocolateyInstall.ps1
@@ -147,6 +153,7 @@ param (
 	Write-Host "Installing 7zip"
 	Invoke-Command `
 		-ComputerName "$MachineName" `
+		-Credential $cred `
 		-ScriptBlock { start-process `
 							-Passthru `
 							-NoNewWindow `
