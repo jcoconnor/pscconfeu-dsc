@@ -1,9 +1,9 @@
 <html
   <head>
-    <title><%= $fqdn.downcase %></title>
+    <title><%= $certname.downcase %></title>
   </head>
   <body>
-    <h1>Welcome to <%= $fqdn.downcase %></h1>
+    <h1>Welcome to <%= $certname.downcase %></h1>
     <p>
       I am a <%= $operatingsystem.capitalize %> <%= $operatingsystemrelease %>
       machine and I've been running for <%= $uptime %>.
