@@ -3,5 +3,16 @@
 
 . .\AzureAgents.ps1
 
-New-WinOps2017VM -MachineName WinopsDemo-32
 
+$MachineList = @(
+  'WinopsDemo-51',
+  'WinopsDemo-52'
+)
+$MachineList | % {
+
+  $MachineName = $_.toLower()
+  New-WinOps2017VM -MachineName $MachineName
+
+  Configure-WinOps2017VM -MachineName $MachineName
+
+}
