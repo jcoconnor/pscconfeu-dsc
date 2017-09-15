@@ -1,5 +1,6 @@
 #
 
 class role::webserver {
-  include ::profile::iis::dscwebsite
+  include ::profile::iis::iisservice
+  include ::profile::www::webpage
 }
