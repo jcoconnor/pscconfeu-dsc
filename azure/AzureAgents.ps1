@@ -33,7 +33,7 @@ param (
 				-ResourceGroupName $ResourceGroupName `
 				-DomainNameLabel "$MachineName" `
 				-Location $LocationName `
-				-AllocationMethod Dynamic `
+				-AllocationMethod Static `
 				-IdleTimeoutInMinutes 4 `
 				-Name "$IPName"
 	Write-Host "IP Address is: $($publicIP.IPAddress)"
@@ -59,7 +59,7 @@ param (
 
 	$vmConfig = New-AzureRmVMConfig `
 					-VMName "$MachineName" `
-					-VMSize Standard_D2_V2 | `
+					-VMSize Standard_D1_V2 | `
 				Set-AzureRmVMOperatingSystem `
 					-Windows `
 					-ComputerName "$MachineName" `

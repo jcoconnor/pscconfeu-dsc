@@ -6,25 +6,23 @@
 
 $MachineList = @(
 
-  'WinopsDemo-12',
-  'WinopsDemo-13',
-  'WinopsDemo-14',
-  'WinopsDemo-15',
-  'WinopsDemo-16',
-  'WinopsDemo-17',
-  'WinopsDemo-18',
-  'WinopsDemo-19',
-  'WinopsDemo-20',
-  'WinopsDemo-21',
-  'WinopsDemo-22',
-  'WinopsDemo-23',
-  'WinopsDemo-24',
-  'WinopsDemo-25',
-  'WinopsDemo-26',
-  'WinopsDemo-27',
-  'WinopsDemo-28',
-  'WinopsDemo-29',
-  'WinopsDemo-30'
+
+  'WinopsDemo-101',
+  'WinopsDemo-102',
+  'WinopsDemo-103',
+  'WinopsDemo-104',
+  'WinopsDemo-105',
+  'WinopsDemo-106',
+  'WinopsDemo-107',
+  'WinopsDemo-108',
+  'WinopsDemo-109',
+  'WinopsDemo-110',
+  'WinopsDemo-111',
+  'WinopsDemo-112',
+  'WinopsDemo-113',
+  'WinopsDemo-114',
+  'WinopsDemo-115',
+  'WinopsDemo-130'
   
 )
 $MachineList | % {
