@@ -20,6 +20,6 @@ $MachineList = @(
 $MachineList | % {
 
   $MachineName = $_.toLower()
-  Remove-WinOps2017VM -MachineName $MachineName
+  Start-WinOps2017VM -MachineName $MachineName
 
 }

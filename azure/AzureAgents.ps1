@@ -33,7 +33,7 @@ param (
 				-ResourceGroupName $ResourceGroupName `
 				-DomainNameLabel "$MachineName" `
 				-Location $LocationName `
-				-AllocationMethod Static `
+				-AllocationMethod Dynamic `
 				-IdleTimeoutInMinutes 4 `
 				-Name "$IPName"
 	Write-Host "IP Address is: $($publicIP.IPAddress)"
@@ -59,7 +59,7 @@ param (
 
 	$vmConfig = New-AzureRmVMConfig `
 					-VMName "$MachineName" `
-					-VMSize Standard_DS1_V2 | `
+					-VMSize Standard_D2_V2 | `
 				Set-AzureRmVMOperatingSystem `
 					-Windows `
 					-ComputerName "$MachineName" `
@@ -217,4 +217,34 @@ param (
       -Name $PublicIpAddress.Name `
       -ResourceGroupName $ResourceGroupName `
       -Force
+}
+
+
+
+function Stop-WinOps2017VM {
+param (
+  [string]$MachineName
+ )
+
+	Write-Host "Stopping $MachineName"
+	Stop-AzureRmVM 
+		-ResourceGroupName "$ResourceGroupName" `
+		-Name "$MachineName" `
+		-Force
+	Write-Host "$MachineName Stopped"
+}
+
+
+
+function Start-WinOps2017VM {
+param (
+  [string]$MachineName
+ )
+
+	Write-Host "Starting $MachineName"
+	Start-AzureRmVM 
+		-ResourceGroupName "$ResourceGroupName" `
+		-Name "$MachineName" `
+		-Force
+	Write-Host "$MachineName Started"
 }
