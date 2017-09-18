@@ -65,6 +65,20 @@ Function Manual-Check
   Write-Host $vulnerability
 }
 
+# Before doing any real detection; do the demo test then break
+If (Test-Path C:\Users\puppet\wannacry.txt)
+{
+  $vulnerability = "wannacry_vulnerable=true"
+}
+Else
+{
+  $vulnerability = "wannacry_vulnerable=false"
+}
+
+# Demo check finished, print vulnerability state and break
+Write-Host $vulnerability
+Break
+
 # Reference: https://support.microsoft.com/en-us/help/4023262/how-to-verify-that-ms17-010-is-installed
 # Compare the file version of %systemroot%\system32\drivers\srv.sys to a version that is not vulnerable from MSFT.
 # If srv.sys check isn't available, switch to manually checking for installed hotfixes with Manual-Check function.
