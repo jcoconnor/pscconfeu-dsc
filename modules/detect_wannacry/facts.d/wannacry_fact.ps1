@@ -185,7 +185,7 @@ Else
 
 # The powershell script above is the real wannacry detection.
 # For demo purposes we will test for a file's existence
-If (Test-Path C:\Users\Administrator\wannacry.txt)
+If (Test-Path C:\Users\puppet\wannacry.txt)
 {
   $vulnerability = "wannacry_vulnerable=true"
 }
