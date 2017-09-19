@@ -2,8 +2,6 @@
 #Login-AzureRmAccount
 
 . .\AzureAgents.ps1
-Start-Transcript -IncludeInvocationHeader -Path "\StartAzureAgents.log"
-
 
 $MachineList = @(
 'wol-alexandre',
@@ -39,9 +37,6 @@ $MachineList = @(
 'wol-victoria'
   )
 
-$MachineList | % {
 
-  $MachineName = $_.toLower()
-  Start-WinOps2017VM -MachineName $MachineName
+  WinPatch-WinOps2017VM -MachineList $MachineList
 
-}

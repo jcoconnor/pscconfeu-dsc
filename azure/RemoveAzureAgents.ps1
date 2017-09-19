@@ -2,13 +2,10 @@
 #Login-AzureRmAccount
 
 . .\AzureAgents.ps1
+Start-Transcript -IncludeInvocationHeader -Path "\RemoveAzureAgents.log"
+
 
 $MachineList = @(
-  'WinopsDemo-101',
-  'WinopsDemo-102',
-  'WinopsDemo-103',
-  'WinopsDemo-104',
-  'WinopsDemo-105',
   'WinopsDemo-106',
   'WinopsDemo-107',
   'WinopsDemo-108',

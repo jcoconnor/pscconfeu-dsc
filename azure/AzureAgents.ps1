@@ -79,6 +79,18 @@ param (
 				-Location $LocationName `
 				-VM $vmConfig
 
+	Write-Host "Post-Creation Configuration $MachineName"
+ 
+	Write-Host "Enable remote host as trusted and enabling Filesharing"
+	winrm set winrm/config/client "@{TrustedHosts=""$MachineName""}"	
+	Invoke-Command `
+		-ComputerName "$MachineName" `
+		-Credential $cred `
+		-ScriptBlock { 
+						New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -Value "0x1" -Force
+						Set-Service wuauserv -StartupType disabled
+						Restart-Computer
+					}
 }
 
 
@@ -98,6 +110,7 @@ param (
 						netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=yes
 						mkdir c:\SoftwareDist
 						New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -Value "0x1" -Force
+						Set-Service wuauserv -StartupType disabled
 					}
 					
 	Write-Host "Copy Software Over"
@@ -163,17 +176,35 @@ param (
 
 	Write-Host "Configuration of $MachineName Completed"
 
-#	Invoke-Command `
-#		-ComputerName "$MachineName" `
-#		-ScriptBlock { 
-#						$networkConfig = Get-WmiObject Win32_NetworkAdapterConfiguration -filter "ipenabled = 'true'"
-#						$networkConfig.SetDnsDomain("uksouth.cloudapp.azure.com")
-#						$networkConfig.SetDynamicDNSRegistration($true,$true)
-#						ipconfig /registerdns
-#					}
-	
 }
 
+
+
+function WinPatch-WinOps2017VM {
+param (
+  [string[]]$MachineList
+ )
+
+	write-host "Write $MachineList"
+	$JoinedMachines = (($MachineList|group|Select -ExpandProperty Name) -join ",").toLower()
+	Write-Host "Joined Machines is $JoinedMachines"
+	winrm set winrm/config/client "@{TrustedHosts=""$JoinedMachines""}"
+
+	Write-Host "Installing Patches"
+	Invoke-Command `
+		-ComputerName $MachineList `
+		-Credential $cred `
+		-ScriptBlock {  Set-Service wuauserv -StartupType manual
+						net start wuauserv
+						start-process `
+							-Passthru `
+							-NoNewWindow `
+							-wait "wusa.exe" `
+							-ArgumentList "C:\SoftwareDist\windows10.0-kb4038782-x64_5cc8dccc86516830eb0b1aa030d67f482dd05af0.msu /quiet /norestart" 
+						Restart-Computer }
+	Write-Host "Patches installed"	
+	
+}
 
 
 function Remove-WinOps2017VM {
@@ -227,7 +258,7 @@ param (
  )
 
 	Write-Host "Stopping $MachineName"
-	Stop-AzureRmVM 
+	Stop-AzureRmVM `
 		-ResourceGroupName "$ResourceGroupName" `
 		-Name "$MachineName" `
 		-Force
@@ -242,9 +273,8 @@ param (
  )
 
 	Write-Host "Starting $MachineName"
-	Start-AzureRmVM 
+	Start-AzureRmVM `
 		-ResourceGroupName "$ResourceGroupName" `
-		-Name "$MachineName" `
-		-Force
+		-Name "$MachineName"
 	Write-Host "$MachineName Started"
 }
