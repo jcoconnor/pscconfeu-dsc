@@ -1,0 +1,4 @@
+#
+# Increase jruby max instances to 7
+# 
+puppet_enterprise::master::puppetserver::jruby_max_active_instances: 7
