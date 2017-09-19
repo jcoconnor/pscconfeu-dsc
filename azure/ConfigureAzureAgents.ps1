@@ -5,10 +5,13 @@
 
 
 $MachineList = @(
-  'WinopsDemo-53',
-  'WinopsDemo-54',
-  'WinopsDemo-55'
-)
+
+  'WinopsDemo-13',
+  'WinopsDemo-14',
+  'WinopsDemo-15',
+  'WinopsDemo-16',
+  'WinopsDemo-17'
+  )
 $MachineList | % {
 
   $MachineName = $_.toLower()
