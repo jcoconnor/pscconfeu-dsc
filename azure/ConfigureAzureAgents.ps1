@@ -2,15 +2,41 @@
 #Login-AzureRmAccount
 
 . .\AzureAgents.ps1
+Start-Transcript -IncludeInvocationHeader -Path "\ConfigureAzureAgents.log"
 
 
 $MachineList = @(
-
-  'WinopsDemo-13',
-  'WinopsDemo-14',
-  'WinopsDemo-15',
-  'WinopsDemo-16',
-  'WinopsDemo-17'
+'wol-alexandre',
+'wol-allan',
+'wol-andrew',
+'wol-andy',
+'wol-ankur',
+'wol-brian',
+'wol-chris',
+'wol-david',
+'wol-dmitrii',
+'wol-dominic',
+'wol-ebru',
+'wol-eduardo',
+'wol-iain',
+'wol-ian',
+'wol-ieuan',
+'wol-jagwinder',
+'wol-jonathan',
+'wol-koz',
+'wol-mark',
+'wol-martin',
+'wol-martyna',
+'wol-matt',
+'wol-mihai',
+'wol-paul',
+'wol-richards',
+'wol-richardw',
+'wol-richie',
+'wol-scott',
+'wol-sebastian',
+'wol-stephen',
+'wol-victoria'
   )
 $MachineList | % {
 
