@@ -29,6 +29,11 @@ function Download-File {
 }
 
 # Install Puppet Agent
-Download-File "https://downloads.puppetlabs.com/windows/puppet-agent-x64-latest.msi" $Env:TEMP\puppet-agent.msi
+Download-File "https://downloads.puppetlabs.com/windows/puppet5/puppet-agent-x64-latest.msi" $Env:TEMP\puppet-agent.msi
 Start-Process -Wait "msiexec" -PassThru -NoNewWindow -ArgumentList "/i $Env:TEMP\puppet-agent.msi /qn /norestart PUPPET_AGENT_STARTUP_MODE=automatic PUPPET_MASTER_SERVER=winopsmasterlondon"
 Write-Output "Installed Puppet Agent..."
+
+Write-Output "Environment Refresh"
+foreach($level in "Machine","User") {
+    [Environment]::GetEnvironmentVariables($level)
+ }
