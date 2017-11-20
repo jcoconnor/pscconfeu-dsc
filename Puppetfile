@@ -17,4 +17,4 @@ mod 'puppetlabs-wsus_client', :latest
 mod 'puppet-download_file',   :latest
 mod 'puppet-archive',         :latest
 
-mod 'puppetlabs-facter_task', :latest
+mod 'puppetlabs-facter_task', '0.1.3'
