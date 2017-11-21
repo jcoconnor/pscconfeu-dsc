@@ -18,3 +18,4 @@ mod 'puppet-download_file',   :latest
 mod 'puppet-archive',         :latest
 
 mod 'puppetlabs-facter_task', '0.1.3'
+mod 'puppetlabs-resource', '0.1.0'
