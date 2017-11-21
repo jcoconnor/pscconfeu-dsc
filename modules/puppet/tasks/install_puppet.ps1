@@ -27,10 +27,10 @@ function Download-File {
         }
     }
 }
-
+$ddDir = "C:\Users\puppet\Downloads"
 # Install Puppet Agent
-Download-File "https://downloads.puppetlabs.com/windows/puppet5/puppet-agent-x64-latest.msi" $Env:TEMP\puppet-agent.msi
-Start-Process -Wait "msiexec" -PassThru -NoNewWindow -ArgumentList "/i $Env:TEMP\puppet-agent.msi /qn /norestart PUPPET_AGENT_STARTUP_MODE=automatic PUPPET_MASTER_SERVER=winopsmasterlondon"
+Download-File "https://downloads.puppetlabs.com/windows/puppet5/puppet-agent-x64-latest.msi" $ddDir\puppet-agent.msi
+Start-Process -Wait "msiexec" -PassThru -NoNewWindow -ArgumentList "/i $ddDir\puppet-agent.msi /qn /norestart PUPPET_AGENT_STARTUP_MODE=automatic PUPPET_MASTER_SERVER=winopsmasterlondon"
 Write-Output "Installed Puppet Agent..."
 
 Write-Output "Environment Refresh"
