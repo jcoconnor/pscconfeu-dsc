@@ -200,7 +200,7 @@ param (
 							-Passthru `
 							-NoNewWindow `
 							-wait "wusa.exe" `
-							-ArgumentList "C:\SoftwareDist\windows10.0-kb4038782-x64_5cc8dccc86516830eb0b1aa030d67f482dd05af0.msu /quiet /norestart" 
+							-ArgumentList "C:\SoftwareDist\windows10.0-kb4048953-x64_6fccbf0ed11c9dfbc8d13e50d81ccfe97d1e2b82.msu /quiet /norestart" 
 						Restart-Computer }
 	Write-Host "Patches installed"	
 	
