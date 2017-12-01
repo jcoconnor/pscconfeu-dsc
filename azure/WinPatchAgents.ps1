@@ -4,7 +4,7 @@
 . .\AzureAgents.ps1
 
 $MachineList = @(
-'wol-gsk11'
+'wol-gsk17'
   )
 
 $MachineList | % {

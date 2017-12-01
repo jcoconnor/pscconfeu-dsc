@@ -11,6 +11,7 @@ $LocationName = "UKSouth"
 $DomainNameSuffix = "uksouth.cloudapp.azure.com"
 $SecretName = "smoker"
 $VaultName = "WinOps2017Vault"
+$VMSize = "Standard_D2_V2"
 
 # Use Admin Plaintext password for this phase of configuration
 $secpasswd = ConvertTo-SecureString "WinOps2017" -AsPlainText -Force
@@ -59,7 +60,7 @@ param (
 
 	$vmConfig = New-AzureRmVMConfig `
 					-VMName "$MachineName" `
-					-VMSize Standard_D1_V2 | `
+					-VMSize "$VMSize" | `
 				Set-AzureRmVMOperatingSystem `
 					-Windows `
 					-ComputerName "$MachineName" `
@@ -115,7 +116,7 @@ param (
 					
 	Write-Host "Copy Software Over"
 	$DestSwDir = "\\" + $MachineName + "\c`$\SoftwareDist"
-	NET USE \\$MachineName\IPC$ /u:$MachineName\puppet WinOps2017 
+	NET USE \\$MachineName\IPC$ /u:$MachineName\puppet WinOps2017 /persistent:yes
 	Robocopy /s C:\SoftwareDist "$DestSwDir" *.*
 	
 	Write-Host "Install Puppet"
@@ -190,16 +191,13 @@ param (
 	winrm set winrm/config/client "@{TrustedHosts=""$MachineName""}"
 
 	Write-Host "Installing Patches"
+	# Note - need to use DISM here as WUSA is blocked for remote operations (took ages to work this out).
 	Invoke-Command `
 		-ComputerName "$MachineName" `
 		-Credential $cred `
 		-ScriptBlock {  Set-Service wuauserv -StartupType manual
 						net start wuauserv
-						start-process "C:\Windows\System32\wusa.exe" `
-							-Passthru `
-							-NoNewWindow `
-							-wait `
-							-ArgumentList "C:\SoftwareDist\windows10.0-kb4048953-x64_6fccbf0ed11c9dfbc8d13e50d81ccfe97d1e2b82.msu /quiet /forcerestart" 
+						dism /online /add-package /packagePath:C:\SoftwareDist\xx\Windows10.0-KB4051033-x64.cab /norestart
 						Restart-Computer }
 	Write-Host "Patches installed"	
 	
