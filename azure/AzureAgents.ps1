@@ -182,25 +182,24 @@ param (
 
 function WinPatch-WinOps2017VM {
 param (
-  [string[]]$MachineList
+  [string]$MachineName
  )
 
 	write-host "Write $MachineList"
-	$JoinedMachines = (($MachineList|group|Select -ExpandProperty Name) -join ",").toLower()
-	Write-Host "Joined Machines is $JoinedMachines"
-	winrm set winrm/config/client "@{TrustedHosts=""$JoinedMachines""}"
+
+	winrm set winrm/config/client "@{TrustedHosts=""$MachineName""}"
 
 	Write-Host "Installing Patches"
 	Invoke-Command `
-		-ComputerName $MachineList `
+		-ComputerName "$MachineName" `
 		-Credential $cred `
 		-ScriptBlock {  Set-Service wuauserv -StartupType manual
 						net start wuauserv
-						start-process `
+						start-process "C:\Windows\System32\wusa.exe" `
 							-Passthru `
 							-NoNewWindow `
-							-wait "wusa.exe" `
-							-ArgumentList "C:\SoftwareDist\windows10.0-kb4048953-x64_6fccbf0ed11c9dfbc8d13e50d81ccfe97d1e2b82.msu /quiet /norestart" 
+							-wait `
+							-ArgumentList "C:\SoftwareDist\windows10.0-kb4048953-x64_6fccbf0ed11c9dfbc8d13e50d81ccfe97d1e2b82.msu /quiet /forcerestart" 
 						Restart-Computer }
 	Write-Host "Patches installed"	
 	
