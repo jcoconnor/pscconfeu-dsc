@@ -4,39 +4,43 @@
 . .\AzureAgents.ps1
 
 $MachineList = @(
-'wol-alexandre',
-'wol-allan',
-'wol-andrew',
-'wol-andy',
-'wol-ankur',
-'wol-brian',
-'wol-chris',
-'wol-david',
-'wol-dmitrii',
-'wol-dominic',
-'wol-ebru',
-'wol-eduardo',
-'wol-iain',
-'wol-ian',
-'wol-ieuan',
-'wol-jagwinder',
-'wol-jonathan',
-'wol-koz',
-'wol-mark',
-'wol-martin',
-'wol-martyna',
-'wol-matt',
-'wol-mihai',
-'wol-paul',
-'wol-richards',
-'wol-richardw',
-'wol-richie',
-'wol-scott',
-'wol-sebastian',
-'wol-stephen',
-'wol-victoria'
+'puppet-gsk01',
+'puppet-gsk02',
+'puppet-gsk03',
+'puppet-gsk04',
+'puppet-gsk05',
+'puppet-gsk06',
+'puppet-gsk07',
+'puppet-gsk08',
+'puppet-gsk09',
+'puppet-gsk10',
+'puppet-gsk11',
+'puppet-gsk12',
+'puppet-gsk13',
+'puppet-gsk14',
+'puppet-gsk15'
   )
 
+  
+WinPatch-PsWindowsUpdate -MachineList $MachineList
 
-  WinPatch-WinOps2017VM -MachineList $MachineList
+exit
+
+$MachineList | % {
+
+  $MachineName = $_.toLower()
+  WinPatch-WinOps2017VM -MachineName $MachineName
+}
+
+
+# Alternate Patching Method
+
+$MachineList | % {
+
+  $MachineName = $_.toLower()
+  New-WinOps2017VM -MachineName $MachineName
+
+#  Configure-WinOps2017VM -MachineName $MachineName
+
+}
 
