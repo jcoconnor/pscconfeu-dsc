@@ -1,3 +1,4 @@
+#
 class bootstrap {
 
   # silence puppet and vagrant annoyance about the puppet group

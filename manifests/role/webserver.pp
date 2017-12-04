@@ -1,7 +1,7 @@
 #
 
 class role::webserver {
-  if ($::osfamily == "windows" ) {
+  if ($::osfamily == 'windows' ) {
     include ::profile::iis::iisservice
     include ::profile::www::webpage
   }
@@ -9,7 +9,7 @@ class role::webserver {
     # Departing slighlyt from the roles and profiles model here 
     # and simply including the relevant modules
     Exec {
-        path => ["/usr/bin", "/bin", "/usr/sbin", "/sbin", "/usr/local/bin", "/usr/local/sbin"]
+        path => ['/usr/bin', '/bin', '/usr/sbin', '/sbin', '/usr/local/bin', '/usr/local/sbin']
       }
     include bootstrap
     include tools
