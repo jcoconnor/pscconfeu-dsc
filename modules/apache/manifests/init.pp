@@ -3,7 +3,7 @@ class apache {
   # install apache
   package { 'apache2':
     ensure  => present,
-    require => Exec['apt-get update']
+    require => Exec['yum update']
   }
 
   # ensures that mode_rewrite is loaded and modifies the default configuration file

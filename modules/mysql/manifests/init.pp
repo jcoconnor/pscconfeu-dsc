@@ -6,7 +6,7 @@ class mysql {
   # install mysql server
   package { 'mysql-server':
     ensure  => present,
-    require => Exec['apt-get update']
+    require => Exec['yum update']
   }
 
   #start mysql service
