@@ -3,7 +3,8 @@ class php {
 
   # package install list
   $packages = [
-    'php'
+    'php',
+    'php-pear'
   ]
 
   package { $packages:
