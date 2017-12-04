@@ -1,50 +1,50 @@
 class apache {
 
   # install apache
-  package { 'apache2':
+  package { 'httpd':
     ensure  => present,
     require => Exec['yum update']
   }
 
   # ensures that mode_rewrite is loaded and modifies the default configuration file
-  file { '/etc/apache2/mods-enabled/rewrite.load':
+  file { '/etc/httpd/mods-enabled/rewrite.load':
     ensure  => link,
-    target  => '/etc/apache2/mods-available/rewrite.load',
-    require => Package['apache2']
+    target  => '/etc/httpd/mods-available/rewrite.load',
+    require => Package['httpd']
   }
 
   # create directory
-  file {'/etc/apache2/sites-enabled':
+  file {'/etc/httpd/sites-enabled':
     ensure  => directory,
     recurse => true,
     purge   => true,
     force   => true,
-    before  => File['/etc/apache2/sites-enabled/vagrant_webroot'],
-    require => Package['apache2'],
+    before  => File['/etc/httpd/sites-enabled/vagrant_webroot'],
+    require => Package['httpd'],
   }
 
   # create apache config from main vagrant manifests
-  file { '/etc/apache2/sites-available/vagrant_webroot':
+  file { '/etc/httpd/sites-available/vagrant_webroot':
     ensure  => present,
     source  => '/vagrant/manifests/vagrant_webroot',
-    require => Package['apache2'],
+    require => Package['httpd'],
   }
 
   # symlink apache site to the site-enabled directory
-  file { '/etc/apache2/sites-enabled/vagrant_webroot':
+  file { '/etc/httpd/sites-enabled/vagrant_webroot':
     ensure  => link,
-    target  => '/etc/apache2/sites-available/vagrant_webroot',
-    require => File['/etc/apache2/sites-available/vagrant_webroot'],
-    notify  => Service['apache2'],
+    target  => '/etc/httpd/sites-available/vagrant_webroot',
+    require => File['/etc/httpd/sites-available/vagrant_webroot'],
+    notify  => Service['httpd'],
   }
 
-  # starts the apache2 service once the packages installed, and monitors changes to its configuration files and reloads if nesessary
-  service { 'apache2':
+  # starts the httpd service once the packages installed, and monitors changes to its configuration files and reloads if nesessary
+  service { 'httpd':
     ensure    => running,
-    require   => Package['apache2'],
+    require   => Package['httpd'],
     subscribe => [
-      File['/etc/apache2/mods-enabled/rewrite.load'],
-      File['/etc/apache2/sites-available/vagrant_webroot']
+      File['/etc/httpd/mods-enabled/rewrite.load'],
+      File['/etc/httpd/sites-available/vagrant_webroot']
     ],
   }
 }
