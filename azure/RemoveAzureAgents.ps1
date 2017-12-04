@@ -2,11 +2,12 @@
 #Login-AzureRmAccount
 
 . .\AzureAgents.ps1
-Start-Transcript -IncludeInvocationHeader -Path "\RemoveAzureAgents.log"
+Start-Transcript -IncludeInvocationHeader -Path "\RemoveAzureAgents-18.log"
 
 
 $MachineList = @(
-  'wol-gsk15'
+  'wol-gsk17',
+  'wol-gsk18'
   
   )
 
