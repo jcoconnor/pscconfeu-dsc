@@ -23,4 +23,5 @@ mod 'puppetlabs-resource', '0.1.0'
 # These for the Lamp Server Stack on Linux
 mod 'puppetlabs-apache', '2.3.0'
 mod 'puppetlabs-mysql', '5.1.0'
-
+mod 'hunner-wordpress', '1.0.0'
+mod 'puppetlabs-concat', '4.1.1'
