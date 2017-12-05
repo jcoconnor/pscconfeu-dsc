@@ -1,4 +1,4 @@
 #
 class profile::db::php {
-  include mysql::php
+  include ::mysql::php
 }
