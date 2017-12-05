@@ -1,6 +1,6 @@
 #
 class profile::wordpress::wordpress {
-  include profile::web
+  include profile::web::web
   ## Create user
   group { 'wordpress':
     ensure => present,
