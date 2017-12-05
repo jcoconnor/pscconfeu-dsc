@@ -15,5 +15,5 @@ class role::demo {
   # Install Process Explorer utility.
   include ::profile::util::processexplorer
   # Add WSUS Enforcement
-  include ::profile::wsus::wsus
+  #include ::profile::wsus::wsus
 }
