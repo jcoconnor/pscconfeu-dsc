@@ -1,4 +1,0 @@
-class profile::sqlserver::sqlserver {
-
-
-}

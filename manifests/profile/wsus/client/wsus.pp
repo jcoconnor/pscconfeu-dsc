@@ -1,6 +1,6 @@
 
   # Obligatory comment
-  class profile::wsus::wsus {
+  class profile::wsus::client::wsus {
 
     # Enforce Windows Update to run every Sunday.
     class { 'wsus_client':
