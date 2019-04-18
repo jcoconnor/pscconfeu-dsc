@@ -28,6 +28,7 @@ node default {
   # This is where you can declare classes for all nodes.
   # Example:
   #   class { 'my_class': }
+  include profile::wsus::server::wsus_server
 }
 
 # Set defaults for all `exec` resources
@@ -35,3 +36,4 @@ Exec {
   path      => $::path,
   logoutput => true,
 }
+
