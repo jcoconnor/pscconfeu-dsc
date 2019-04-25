@@ -1,20 +1,6 @@
-# 
 # Dervived from: https://github.com/Microsoft/WindowsServerUpdateServicesConfig/blob/master/WindowsServerUpdateServicesConfig.ps1
 # UpdateServicesDSC: https://github.com/mgreenegit/UpdateServicesDsc
-
-
-
-
-  # Dependency on Nuget Repository ???
-  # Causes Powershell Failure....
-  # Install-Module UpdateServicesDsc -Scope AllUsers -force -Repository PsGallery
-#  exec { 'Install NuGet package provider':
-#    command   => '$(Install-PackageProvider -Name NuGet -Force)',
-#    onlyif    => '$(if((Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction SilentlyContinue) -eq $null) { exit 0 } else { exit 1 })',
-#    provider  => 'powershell',
-#    logoutput => true,
-#    before    => Package['UpdateServicesDsc']
-#  }
+class profile::wsus::server::wsus_server {
 
   # Package installer - using:  hbuckle/powershellmodule
   pspackageprovider {'Nuget':
@@ -23,8 +9,8 @@
 
   psrepository { 'PSGallery':
     ensure              => present,
-    source_location     => 'https://www.powershellgallery.com/api/v2/',
-    installation_policy => 'trusted',
+    source_location     => 'https://www.powershellgallery.com/api/v2',
+#   installation_policy => 'trusted',
   }
 
   package { 'UpdateServicesDsc':
@@ -64,12 +50,8 @@
     require       => Dsc['UpdateServices-Feature','UpdateServicesRSAT-Feature'],
     properties    => {
         ensure                            => 'present',
-        contentdir                        => 'C:\\WSUS',
-        languages                         => [
-            'en',
-            'ja',
-            'fr'
-        ],
+        contentdir                        => 'D:\\WSUS',
+        languages                         => ['en'],
         products                          => [
             'Windows 10 LTSB',
             'Windows 10',
@@ -84,16 +66,15 @@
             'Windows Server 2019'
         ],
         classifications                   => [
-            'E6CF1350-C01B-414D-A61F-263D14D133B4', #CriticalUpdates
-            'E0789628-CE08-4437-BE74-2495B842F43B', #DefinitionUpdates
-            '0FA1201D-4330-4FA8-8AE9-B877473B6441', #SecurityUpdates
-            '68C5B0A3-D1A6-4553-AE49-01D3A7827828', #ServicePacks
-            '28BC880E-0592-4CBF-8F95-C79B17911D5F' #UpdateRollUps
+            'E6CF1350-C01B-414D-A61F-263D14D133B4', # CriticalUpdates
+            'E0789628-CE08-4437-BE74-2495B842F43B', # DefinitionUpdates
+            '0FA1201D-4330-4FA8-8AE9-B877473B6441', # SecurityUpdates
+            '68C5B0A3-D1A6-4553-AE49-01D3A7827828', # ServicePacks
+            '28BC880E-0592-4CBF-8F95-C79B17911D5F'  # UpdateRollUps
         ],
         synchronize                       => true,
         synchronizeautomatically          => true,
         synchronizeautomaticallytimeofday => '15:30:00',
-        #runrulenow                        => true,
     },
   }
 
@@ -110,67 +91,23 @@
     },
   }
 
-  dsc { 'DefinitionUpdates':
+  dsc { 'ApprovalRules':
     resource_name => 'UpdateServicesApprovalRule',
     module        => 'UpdateServicesDsc',
     require       => Dsc['UpdateServices'],
     properties    => {
       ensure          => 'present',
-      name            => 'Definition Updates',
-      classifications => 'E0789628-CE08-4437-BE74-2495B842F43B',
+      name            => 'Definition Updates, Critical Updates, Update Rollups, Service Packs, Security Updates',
+      classifications => [
+            'E6CF1350-C01B-414D-A61F-263D14D133B4', # CriticalUpdates
+            'E0789628-CE08-4437-BE74-2495B842F43B', # DefinitionUpdates
+            '0FA1201D-4330-4FA8-8AE9-B877473B6441', # SecurityUpdates
+            '68C5B0A3-D1A6-4553-AE49-01D3A7827828', # ServicePacks
+            '28BC880E-0592-4CBF-8F95-C79B17911D5F'  # UpdateRollUps
+                        ],
       enabled         => true,
       synchronize     => true,
+      runrulenow      => true,
     },
   }
-
-  dsc { 'CriticalUpdates':
-    resource_name => 'UpdateServicesApprovalRule',
-    module        => 'UpdateServicesDsc',
-    require       => Dsc['UpdateServices'],
-    properties    => {
-      ensure          => 'present',
-      name            => 'Critical Updates',
-      classifications => 'E6CF1350-C01B-414D-A61F-263D14D133B4',
-      enabled         => true,
-      synchronize     => true,
-    },
-  }
-
-  dsc { 'UpdateRollUps':
-    resource_name => 'UpdateServicesApprovalRule',
-    module        => 'UpdateServicesDsc',
-    require       => Dsc['UpdateServices'],
-    properties    => {
-      ensure          => 'present',
-      name            => 'Update RollUps',
-      classifications => '28BC880E-0592-4CBF-8F95-C79B17911D5F',
-      enabled         => true,
-      synchronize     => true,
-    },
-  }
-
-  dsc { 'ServicePacks':
-    resource_name => 'UpdateServicesApprovalRule',
-    module        => 'UpdateServicesDsc',
-    require       => Dsc['UpdateServices'],
-    properties    => {
-      ensure          => 'present',
-      name            => 'Service Packs',
-      classifications => '68C5B0A3-D1A6-4553-AE49-01D3A7827828',
-      enabled         => true,
-      synchronize     => true,
-    },
-  }
-
-  dsc { 'SecurityUpdates':
-    resource_name => 'UpdateServicesApprovalRule',
-    module        => 'UpdateServicesDsc',
-    require       => Dsc['UpdateServices'],
-    properties    => {
-      ensure          => 'present',
-      name            => 'Security Updates',
-      classifications => '0FA1201D-4330-4FA8-8AE9-B877473B6441',
-      enabled         => true,
-      synchronize     => true,
-    },
-  }
+}
