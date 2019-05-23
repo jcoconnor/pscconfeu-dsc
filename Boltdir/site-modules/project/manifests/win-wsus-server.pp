@@ -11,10 +11,10 @@
 #    azure_client_secret
 
 $windows_init_data = @(WINDATA /L)
-  $size=(Get-PartitionSupportedSize -DriveLetter C); Resize-Partition -DriveLetter C -Size $size.SizeMax; [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}; $webClient = New-Object System.Net.WebClient; $webClient.DownloadFile('https://psconfeudsc.uksouth.cloudapp.azure.com:8140/packages/current/install.ps1', 'install.ps1'); .\install.ps1 -PuppetServiceEnsure stopped -PuppetServiceEnable false main:certname="$ENV:ComputerName"; $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User"); puppet agent -t; winrm quickconfig -force;
+  powershell -ExecutionPolicy Unrestricted -Command "$size=(Get-PartitionSupportedSize -DriveLetter C); Resize-Partition -DriveLetter C -Size $size.SizeMax; [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}; $webClient = New-Object System.Net.WebClient; $webClient.DownloadFile('https://psconfeudsc.uksouth.cloudapp.azure.com:8140/packages/current/install.ps1', 'install.ps1'); .\install.ps1 -PuppetServiceEnsure stopped -PuppetServiceEnable false main:certname=$ENV:ComputerName;"
   WINDATA
 
-$ws_count         = '8'
+$ws_count         = '9'
 
 $base_name        = "win-wsus-${ws_count}"
 $subscription_id = 'c82736ee-c108-452b-8178-f548c95d18fe'
@@ -146,12 +146,12 @@ azure_virtual_machine_extension { 'script' :
       displayName => "${vm_base_name}/script",
   },
   properties           => {
-    protectedSettings  => {
-      commandToExecute   => $windows_init_data,
-    },
     publisher          => 'Microsoft.Compute',
     type               => 'CustomScriptExtension',
     typeHandlerVersion => '1.9',
+    protectedSettings  => {
+      commandToExecute   => $windows_init_data,
+    },
   },
   resource_group_name  => $rg,
   subscription_id      => $subscription_id,
