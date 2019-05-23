@@ -10,22 +10,30 @@
 #    azure_client_id
 #    azure_client_secret
 
-$role          = 'sample_website'
-$master_ip     = 'XXXXXX'
-$master_url    = 'https://psconfeudsc.uksouth.cloudapp.azure.com:8140/packages/current/install.bash'
-$instance_name = 'awskit-demo-host'
+  $role          = 'sample_website'
+  $master_ip     = '35.177.8.154'
+  $master_url    = 'https://master.inf.puppet.vm:8140/packages/current/install.bash'
+  $instance_name = 'awskit-demo-host'
+
+  $linux_user_data = @("USERDATA"/L)
+    #! /bin/bash
+    echo "${master_ip} master.inf.puppet.vm master" >> /etc/hosts
+    curl -k ${master_url} | bash -s agent:certname=${instance_name} extension_requests:pp_role=${role}
+    | USERDATA
+
+  $master_user_data = @("USERDATA"/L)
+    #! /bin/bash
+    echo "${master_ip} master.inf.puppet.vm master" >> /etc/hosts
+    curl -k ${master_url} | bash -s agent:certname=${instance_name} extension_requests:pp_role=${role}
+    | USERDATA
+  $windows_user_data = @("USERDATA"/L)
+    #! /bin/bash
+    echo "${master_ip} master.inf.puppet.vm master" >> /etc/hosts
+    curl -k ${master_url} | bash -s agent:certname=${instance_name} extension_requests:pp_role=${role}
+    | USERDATA
 
 
-$windows_user_data = @("USERDATA"/L)
-[Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}; 
-$webClient = New-Object System.Net.WebClient; 
-$webClient.DownloadFile('https://psconfeudsc.uksouth.cloudapp.azure.com:8140/packages/current/install.ps1', 'install.ps1'); 
-.\install.ps1 main:certname="$(hostname)"
-winrm quickconfig -force
- | USERDATA
-
-
-$base_name        = 'psconfeudsc'
+$base_name        = 'devhops'
 $rg               = "${base_name}-rg"
 $storage_account  = "${base_name}saccount"
 $nsg              = "${base_name}-nsg"
@@ -228,4 +236,85 @@ azure_virtual_machine { $vm_base_name:
     },
   },
   type                => 'Microsoft.Compute/virtualMachines',
+}
+
+
+$azure_os_disk = {
+  caching => $azure_caching
+  createOption => $azure_create_option
+  diffDiskSettings => $azure_diff_disk_settings
+  diskSizeGB => "1234 (optional)",
+  encryptionSettings => $azure_disk_encryption_settings
+  image => $azure_virtual_hard_disk
+  managedDisk => $azure_managed_disk_parameters
+  name => "name (optional)",
+  osType => "osType (optional)",
+  vhd => $azure_virtual_hard_disk
+  writeAcceleratorEnabled => "writeAcceleratorEnabled (optional)",
+}
+
+
+# https://github.com/puppetlabs/puppetlabs-azure_arm/blob/master/azure_virtual_machine.md
+$azure_data_disk = {
+  caching => $azure_caching
+  createOption => $azure_create_option
+  diskSizeGB => "1234 (optional)",
+  image => $azure_virtual_hard_disk
+  lun => "1234",
+  managedDisk => $azure_managed_disk_parameters
+  name => "name (optional)",
+  vhd => $azure_virtual_hard_disk
+  writeAcceleratorEnabled => "writeAcceleratorEnabled (optional)",
+}
+
+# https://github.com/puppetlabs/puppetlabs-azure_arm/blob/master/azure_disk.md
+azure_disk {
+  api_version => "api_version",
+  disk => "disk",
+  location => "location (optional)",
+  properties => $azure_disk_properties
+  resource_group_name => "resource_group_name",
+  sku => $azure_disk_sku
+  subscription_id => "subscription_id",
+  tags => "tags (optional)",
+  zones => "zones (optional)",
+}
+$azure_disk_properties = {
+  creationData => $azure_creation_data
+  diskIOPSReadWrite => "1234 (optional)",
+  diskMBpsReadWrite => "1234 (optional)",
+  diskSizeGB => "1234 (optional)",
+  encryptionSettings => $azure_encryption_settings
+  osType => "osType (optional)",
+}
+
+$azure_creation_data = {
+  createOption => "createOption",
+  imageReference => $azure_image_disk_reference - optional
+  sourceResourceId => "sourceResourceId (optional)",
+  sourceUri => "sourceUri (optional)",
+  storageAccountId => "storageAccountId (optional)",
+}
+
+
+# This extension appears to be quite picky in terms of syntax.
+azure_virtual_machine_extension { 'script' :
+  type                 => 'Microsoft.Compute/virtualMachines/extensions',
+  extension_parameters => '',
+  location             => $location,
+  tags                 => {
+      displayName => "${vm_base_name}/script",
+  },
+  properties           => {
+    protectedSettings  => {
+      commandToExecute   => $user_data,
+    },
+    publisher          => 'Microsoft.Azure.Extensions',
+    type               => 'CustomScript',
+    typeHandlerVersion => '2.0',
+  },
+  resource_group_name  => $rg,
+  subscription_id      => $subscription_id,
+  vm_extension_name    => 'script',
+  vm_name              => $vm_base_name,
 }
