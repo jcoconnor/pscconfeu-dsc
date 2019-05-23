@@ -50,7 +50,7 @@ class profile::wsus::server::wsus_server {
     require       => Dsc['UpdateServices-Feature','UpdateServicesRSAT-Feature'],
     properties    => {
         ensure                            => 'present',
-        contentdir                        => 'D:\\WSUS',
+        contentdir                        => 'C:\\WSUS',
         languages                         => ['en'],
         products                          => [
             'Windows 10 LTSB',

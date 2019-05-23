@@ -10,12 +10,17 @@
 #    azure_client_id
 #    azure_client_secret
 
-$role          = 'sample_website'
-$master_ip     = 'XXXXXX'
-$master_url    = 'https://psconfeudsc.uksouth.cloudapp.azure.com:8140/packages/current/install.bash'
-$instance_name = 'awskit-demo-host'
+$windows_init_data = @(WINDATA /L)
+  $size=(Get-PartitionSupportedSize -DriveLetter C);
+  Resize-Partition -DriveLetter C -Size $size.SizeMax;
+  [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}; 
+  $webClient = New-Object System.Net.WebClient; 
+  $webClient.DownloadFile('https://psconfeudsc.uksouth.cloudapp.azure.com:8140/packages/current/install.ps1', 'install.ps1'); 
+  .\install.ps1 -PuppetServiceEnsure stopped -PuppetServiceEnable false main:certname="$ENV:ComputerName";
+  winrm quickconfig -force;
+  WINDATA
 
-$ws_count         = '2'
+$ws_count         = '3'
 
 $base_name        = "win-wsus-${ws_count}"
 $subscription_id = 'c82736ee-c108-452b-8178-f548c95d18fe'
@@ -129,4 +134,27 @@ azure_virtual_machine { $vm_base_name:
     },
   },
   type                => 'Microsoft.Compute/virtualMachines',
+}
+
+
+# This extension appears to be quite picky in terms of syntax.
+azure_virtual_machine_extension { 'script' :
+  type                 => 'Microsoft.Compute/virtualMachines/extensions',
+  extension_parameters => '',
+  location             => $location,
+  tags                 => {
+      displayName => "${vm_base_name}/script",
+  },
+  properties           => {
+    protectedSettings  => {
+      commandToExecute   => $windows_init_data,
+    },
+    publisher          => 'Microsoft.Azure.Extensions',
+    type               => 'CustomScript',
+    typeHandlerVersion => '2.0',
+  },
+  resource_group_name  => $rg,
+  subscription_id      => $subscription_id,
+  vm_extension_name    => 'script',
+  vm_name              => $vm_base_name,
 }
