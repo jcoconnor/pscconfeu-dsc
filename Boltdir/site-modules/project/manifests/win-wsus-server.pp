@@ -20,7 +20,7 @@ $windows_init_data = @(WINDATA /L)
   winrm quickconfig -force;
   WINDATA
 
-$ws_count         = '3'
+$ws_count         = '5'
 
 $base_name        = "win-wsus-${ws_count}"
 $subscription_id = 'c82736ee-c108-452b-8178-f548c95d18fe'
@@ -64,6 +64,12 @@ azure_public_ip_address { $publicip:
   parameters          => {
     idleTimeoutInMinutes => '10',
   },
+  properties => {
+    publicIPAllocationMethod => 'Static',
+    dnsSettings => {
+      domainNameLabel => $vm_base_name,
+    }
+  }
 }
 
 # Create multiple NIC's and VM's
