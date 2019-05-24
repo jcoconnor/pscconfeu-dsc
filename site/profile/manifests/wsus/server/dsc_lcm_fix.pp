@@ -1,7 +1,8 @@
 # Fix for lmconfig issues
 # https://github.com/puppetlabs/support-training/blob/3fed84cfced5e8ef45b85d25dc7d97d5f4b877b3/puppetlabs-dsc_lite/resource_provisioning.pp#L57
 class profile::wsus::server::dsc_lcm_fix {
-  $lcmconfig = @(CONFIG)
+
+  $lcmconfig = @(LCMCONFIGFILE)
     [DSCLocalConfigurationManager()]
     configuration LCMConfig
     {
@@ -15,12 +16,12 @@ class profile::wsus::server::dsc_lcm_fix {
     }
 
     LCMConfig
-    | CONFIG
+    | LCMCONFIGFILE
 
   $configscript = @("SCRIPT"/$)
     \$configString = @"
-  $lcmconfig
-  "@
+    ${lcmconfig}
+    "@
     Set-Location \$env:tmp
 
     Set-Content -PATH .\lcm_config_script.ps1 -Value \$configString -Force
@@ -38,4 +39,5 @@ class profile::wsus::server::dsc_lcm_fix {
     unless   => 'if((Get-DscLocalConfigurationManager).refreshmode -ne "disabled") {exit 1}',
     provider => powershell,
   }
+
 }

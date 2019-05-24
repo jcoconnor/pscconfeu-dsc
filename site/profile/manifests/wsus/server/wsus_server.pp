@@ -2,6 +2,9 @@
 # UpdateServicesDSC: https://github.com/mgreenegit/UpdateServicesDsc
 class profile::wsus::server::wsus_server {
 
+  # Include DSC LCM Fix
+  include profile::wsus::server::dsc_lcm_fix
+
   # Package installer - using:  hbuckle/powershellmodule
   pspackageprovider {'Nuget':
     ensure => 'present'
