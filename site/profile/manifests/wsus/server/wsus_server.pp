@@ -2,8 +2,17 @@
 # UpdateServicesDSC: https://github.com/mgreenegit/UpdateServicesDsc
 class profile::wsus::server::wsus_server {
 
-  # Include DSC LCM Fix
-  include profile::wsus::server::dsc_lcm_fix
+  # The following GUIDS reference differing type of Updates for setting up WSUS and
+  # its associated approval rules.
+  $wsus_critical_updates   = 'E6CF1350-C01B-414D-A61F-263D14D133B4'
+  $wsus_definition_updates = 'E0789628-CE08-4437-BE74-2495B842F43B'
+  $wsus_security_updates   = '0FA1201D-4330-4FA8-8AE9-B877473B6441'
+  $wsus_service_packs      = '68C5B0A3-D1A6-4553-AE49-01D3A7827828'
+  $wsus_update_rollups     = '28BC880E-0592-4CBF-8F95-C79B17911D5F'
+
+  Dscfix::Lcm_config { 'disableLCM':
+    refresh_mode => 'Disabled'
+  }
 
   # Package installer - using:  hbuckle/powershellmodule
   pspackageprovider {'Nuget':
@@ -11,9 +20,8 @@ class profile::wsus::server::wsus_server {
   }
 
   psrepository { 'PSGallery':
-    ensure              => present,
-    source_location     => 'https://www.powershellgallery.com/api/v2',
-#   installation_policy => 'trusted',
+    ensure          => present,
+    source_location => 'https://www.powershellgallery.com/api/v2',
   }
 
   package { 'UpdateServicesDsc':
@@ -35,6 +43,7 @@ class profile::wsus::server::wsus_server {
       ensure => 'present',
       name   => 'UpdateServices'
     },
+    require       => Dscfix::Lcm_config['disableLCM'],
   }
 
   dsc {'UpdateServicesRSAT-Feature':
@@ -45,15 +54,15 @@ class profile::wsus::server::wsus_server {
       name                 => 'UpdateServices-RSAT',
       includeallsubfeature => true,
     },
+    require       => Dscfix::Lcm_config['disableLCM'],
   }
 
   dsc {'UpdateServices':
     resource_name => 'UpdateServicesServer',
     module        => 'UpdateServicesDsc',
-    require       => Dsc['UpdateServices-Feature','UpdateServicesRSAT-Feature'],
     properties    => {
         ensure                            => 'present',
-        contentdir                        => 'C:\\WSUS',
+        contentdir                        => 'C:\WSUS',
         languages                         => ['en'],
         products                          => [
             'Windows 10 LTSB',
@@ -69,22 +78,22 @@ class profile::wsus::server::wsus_server {
             'Windows Server 2019'
         ],
         classifications                   => [
-            'E6CF1350-C01B-414D-A61F-263D14D133B4', # CriticalUpdates
-            'E0789628-CE08-4437-BE74-2495B842F43B', # DefinitionUpdates
-            '0FA1201D-4330-4FA8-8AE9-B877473B6441', # SecurityUpdates
-            '68C5B0A3-D1A6-4553-AE49-01D3A7827828', # ServicePacks
-            '28BC880E-0592-4CBF-8F95-C79B17911D5F'  # UpdateRollUps
+            $wsus_critical_updates,
+            $wsus_definition_updates,
+            $wsus_security_updates,
+            $wsus_service_packs,
+            $wsus_update_rollups,
         ],
         synchronize                       => true,
         synchronizeautomatically          => true,
         synchronizeautomaticallytimeofday => '15:30:00',
     },
+    require       => Dsc['UpdateServices-Feature','UpdateServicesRSAT-Feature'],
   }
 
   dsc {'UpdateServicesCleanup':
     resource_name => 'UpdateServicesCleanup',
     module        => 'UpdateServicesDsc',
-    require       => Dsc['UpdateServices'],
     properties    => {
       ensure                      => 'present',
       declineexpiredupdates       => true,
@@ -92,25 +101,26 @@ class profile::wsus::server::wsus_server {
       cleanupobsoleteupdates      => true,
       cleanupunneededcontentfiles => true,
     },
+    require       => Dsc['UpdateServices'],
   }
 
   dsc { 'ApprovalRules':
     resource_name => 'UpdateServicesApprovalRule',
     module        => 'UpdateServicesDsc',
-    require       => Dsc['UpdateServices'],
     properties    => {
       ensure          => 'present',
       name            => 'Definition Updates, Critical Updates, Update Rollups, Service Packs, Security Updates',
       classifications => [
-            'E6CF1350-C01B-414D-A61F-263D14D133B4', # CriticalUpdates
-            'E0789628-CE08-4437-BE74-2495B842F43B', # DefinitionUpdates
-            '0FA1201D-4330-4FA8-8AE9-B877473B6441', # SecurityUpdates
-            '68C5B0A3-D1A6-4553-AE49-01D3A7827828', # ServicePacks
-            '28BC880E-0592-4CBF-8F95-C79B17911D5F'  # UpdateRollUps
-                        ],
+            $wsus_critical_updates,
+            $wsus_definition_updates,
+            $wsus_security_updates,
+            $wsus_service_packs,
+            $wsus_update_rollups,
+            ],
       enabled         => true,
       synchronize     => true,
       runrulenow      => true,
     },
+    require       => Dsc['UpdateServices'],
   }
 }
