@@ -11,10 +11,15 @@
 #    azure_client_secret
 
 $windows_init_data = @(WINDATA /L)
-  powershell -ExecutionPolicy Unrestricted -Command "$size=(Get-PartitionSupportedSize -DriveLetter C); Resize-Partition -DriveLetter C -Size $size.SizeMax; [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}; $webClient = New-Object System.Net.WebClient; $webClient.DownloadFile('https://psconfeudsc.uksouth.cloudapp.azure.com:8140/packages/current/install.ps1', 'install.ps1'); .\install.ps1 -PuppetServiceEnsure stopped -PuppetServiceEnable false main:certname=$ENV:ComputerName;"
-  WINDATA
+  powershell -ExecutionPolicy Unrestricted -Command "$size=(Get-PartitionSupportedSize -DriveLetter C);
+  Resize-Partition -DriveLetter C -Size $size.SizeMax;
+  [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true};
+  $webClient = New-Object System.Net.WebClient;
+  $webClient.DownloadFile('https://psconfeudsc.uksouth.cloudapp.azure.com:8140/packages/current/install.ps1', 'install.ps1');
+  .\install.ps1 -PuppetServiceEnsure stopped -PuppetServiceEnable false main:certname=$ENV:ComputerName;"
+  | WINDATA
 
-$ws_count         = '10'
+$ws_count         = '13'
 
 $base_name        = "win-wsus-${ws_count}"
 $subscription_id = 'c82736ee-c108-452b-8178-f548c95d18fe'
@@ -108,7 +113,7 @@ azure_virtual_machine { $vm_base_name:
       osDisk         => {
         name         => $vm_base_name,
         createOption => 'FromImage',
-        diskSizeGB   => 300,
+        diskSizeGB   => 500,
         caching      => 'None',
         vhd          => {
           uri => "https://${$storage_account}.blob.core.windows.net/${vm_base_name}-container/${vm_base_name}.vhd"
